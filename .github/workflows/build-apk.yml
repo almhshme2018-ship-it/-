@@ -14,29 +14,56 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Unzip Huroofna project
+      - name: Extract project ZIP
         run: |
-          mkdir project
+          rm -rf project
+          mkdir -p project
           unzip -q Huroofna_CloudBuild_1.0.0.zip -d project
-          echo "Project extracted"
+          echo "Project extracted successfully"
+          find project -maxdepth 4 -type f | head -100
 
-      - name: Setup Java
+      - name: Find Android project
+        run: |
+          GRADLEW=$(find project -type f -name gradlew -print -quit)
+
+          if [ -z "$GRADLEW" ]; then
+            echo "ERROR: gradlew not found"
+            find project -maxdepth 6 -type f
+            exit 1
+          fi
+
+          PROJECT_DIR=$(dirname "$GRADLEW")
+          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
+
+          echo "Android project found at:"
+          echo "$PROJECT_DIR"
+
+      - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: "17"
 
-      - name: Setup Gradle
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.9'
+          gradle-version: "8.9"
 
       - name: Build APK
-        working-directory: project/Huroofna_CloudBuild_1.0.0
-        run: gradle --no-daemon assembleDebug
+        run: |
+          echo "Building Android project..."
+          echo "PROJECT_DIR=$PROJECT_DIR"
+          cd "$PROJECT_DIR"
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleDebug --stacktrace
+
+      - name: Find APK
+        run: |
+          echo "APK files:"
+          find "$PROJECT_DIR" -type f -name "*.apk"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Huroofna-debug-apk
-          path: project/Huroofna_CloudBuild_1.0.0/app/build/outputs/apk/debug/app-debug.apk
+          path: "${{ env.PROJECT_DIR }}/app/build/outputs/apk/debug/app-debug.apk"
