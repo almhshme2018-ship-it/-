@@ -15,6 +15,7 @@ jobs:
 
       - name: Extract project ZIP
         run: |
+          rm -rf project
           mkdir -p project
           unzip -q Huroofna_CloudBuild_1.0.0.zip -d project
           echo "Extracted project:"
@@ -22,7 +23,7 @@ jobs:
 
       - name: Find Android project
         run: |
-          GRADLEW=$(find project -type f -name gradlew | head -1)
+          GRADLEW=$(find project -type f -name gradlew -print -quit)
 
           if [ -z "$GRADLEW" ]; then
             echo "ERROR: gradlew not found"
@@ -44,10 +45,6 @@ jobs:
 
       - name: Build APK
         run: |
-          chmod +x gradlew
-          ./gradlew --no-daemon assembleDebug
-        name: Build APK
-        run: |
           echo "PROJECT_DIR=$PROJECT_DIR"
           cd "$PROJECT_DIR"
           chmod +x gradlew
@@ -56,7 +53,7 @@ jobs:
       - name: Find APK
         run: |
           echo "APK files:"
-          find "${PROJECT_DIR}" -type f -name "*.apk"
+          find "$PROJECT_DIR" -type f -name "*.apk"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
