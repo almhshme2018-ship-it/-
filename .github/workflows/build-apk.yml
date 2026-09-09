@@ -22,19 +22,10 @@ jobs:
           echo "Project extracted successfully"
           find project -maxdepth 4 -type f | head -100
 
-      - name: Find Android project
+            - name: Find Android project
         run: |
-          GRADLEW=$(find project -type f -name gradlew -print -quit)
-
-          if [ -z "$GRADLEW" ]; then
-            echo "ERROR: gradlew not found"
-            find project -maxdepth 6 -type f
-            exit 1
-          fi
-
-          PROJECT_DIR=$(dirname "$GRADLEW")
+          PROJECT_DIR="project/HuroofnaCloud"
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
-
           echo "Android project found at:"
           echo "$PROJECT_DIR"
 
