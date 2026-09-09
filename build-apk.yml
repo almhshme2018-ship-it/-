@@ -46,7 +46,12 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew --no-daemon assembleDebug
-        working-directory: ${{ env.PROJECT_DIR }}
+        name: Build APK
+        run: |
+          echo "PROJECT_DIR=$PROJECT_DIR"
+          cd "$PROJECT_DIR"
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleDebug --stacktrace
 
       - name: Find APK
         run: |
