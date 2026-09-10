@@ -23,7 +23,6 @@ jobs:
           find project -maxdepth 4 -type f | head -100
 
             - name: Find Android project
-        run: |
           PROJECT_DIR="project/HuroofnaCloud"
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
           echo "Android project found at:"
