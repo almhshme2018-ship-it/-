@@ -1,0 +1,40 @@
+name: Build Huroofna APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract project ZIP
+        run: |
+          rm -rf project
+          mkdir -p project
+          unzip -q Huroofna_CloudBuild_1.0.0.zip -d project
+          ls project
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Build APK
+        run: |
+          cd project/Huroofna_CloudBuild_1.0.0
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --stacktrace
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Huroofna-debug-apk
+          path: project/Huroofna_CloudBuild_1.0.0/app/build/outputs/apk/debug/*.apk
