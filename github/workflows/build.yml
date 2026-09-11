@@ -1,0 +1,49 @@
+name: Build Huroofna APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract project ZIP
+        run: |
+          rm -rf project
+          mkdir -p project
+          unzip -q Huroofna_CloudBuild_1.0.0.zip -d project
+          echo "=== الملفات اللي طلعت ==="
+          ls -R project
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Find project folder
+        id: find_folder
+        run: |
+          cd project
+          FOLDER=$(ls -d */ | head -n 1)
+          echo "folder=$FOLDER" >> $GITHUB_OUTPUT
+          echo "Found folder: $FOLDER"
+
+      - name: Build APK
+        run: |
+          cd project/${{ steps.find_folder.outputs.folder }}
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --stacktrace
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Huroofna-debug-apk
+          path: project/${{ steps.find_folder.outputs.folder }}/app/build/outputs/apk/debug/*.apk
